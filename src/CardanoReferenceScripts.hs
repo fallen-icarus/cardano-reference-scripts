@@ -18,6 +18,9 @@
 module CardanoReferenceScripts
 (
   BeaconRedeemer(..),
+  ScriptHash,
+  CurrencySymbol,
+  TokenName,
   readScriptHash,
   scriptHashAsToken,
 
