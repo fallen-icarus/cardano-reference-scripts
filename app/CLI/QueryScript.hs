@@ -18,7 +18,7 @@ import CardanoReferenceScripts (CurrencySymbol,ScriptHash)
 
 -- | Takes the beacon symbol, the target script, and the desired network to query the relevant
 -- off-chain api endpoint.
-runQuery :: CurrencySymbol -> ScriptHash -> Network -> IO AvailableReference
+runQuery :: CurrencySymbol -> ScriptHash -> Network -> IO (Maybe AvailableReference)
 runQuery beaconSym targetRefScript network = do
   manager' <- newManager tlsManagerSettings
   case network of

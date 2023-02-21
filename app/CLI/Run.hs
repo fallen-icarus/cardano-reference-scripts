@@ -22,9 +22,11 @@ runCommand cmd = case cmd of
 runQueryScript :: ScriptHash -> Network -> Output -> IO ()
 runQueryScript scriptHash network output = do
   res <- runQuery beaconSymbol scriptHash network
-  case output of
-    Stdout -> BL.putStr $ encode res
-    File file -> BL.writeFile file $ encodePretty res
+  case res of
+    Nothing -> putStrLn "No reference scripts available for that script hash."
+    Just res' -> case output of
+      Stdout -> BL.putStr $ encode res'
+      File file -> BL.writeFile file $ encodePretty res'
 
 createRedeemer :: BeaconRedeemer -> FilePath -> IO ()
 createRedeemer r file = do

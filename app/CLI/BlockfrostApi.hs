@@ -84,15 +84,18 @@ beaconAddressListApi :<|> addressUTxOsApi = client api
 -------------------------------------------------
 -- Query Blockfrost Function
 -------------------------------------------------
-queryBlockfrost :: BlockfrostApiKey -> CurrencySymbol -> ScriptHash -> ClientM AvailableReference
+queryBlockfrost :: BlockfrostApiKey -> CurrencySymbol -> ScriptHash -> ClientM (Maybe AvailableReference)
 queryBlockfrost apiKey beaconSym targetScriptHash = do
-  let beaconId = BeaconId (beaconSym,scriptHashAsToken targetScriptHash)
-  -- | Get the first address that currently holds that beacon.
-  addr <- head <$> beaconAddressListApi apiKey beaconId 1
-  -- | Get all of the utxos for that address.
-  addrUtxos <- addressUTxOsApi apiKey addr
+    let beaconId = BeaconId (beaconSym,scriptHashAsToken targetScriptHash)
+    -- | Get the first address that currently holds that beacon.
+    addr <- beaconAddressListApi apiKey beaconId 1
+    if null addr
+    then return Nothing
+    else do
+      -- | Get all of the utxos for that address.
+      addrUtxos <- addressUTxOsApi apiKey $ head addr
 
-  return $ getInfo addrUtxos $ show targetScriptHash
+      return $ Just $ getInfo addrUtxos $ show targetScriptHash
 
   where
     getInfo :: [RawUTxOInfo] -> String -> AvailableReference
