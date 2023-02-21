@@ -17,6 +17,10 @@
 
 module CardanoReferenceScripts
 (
+  BeaconRedeemer(..),
+  readScriptHash,
+  scriptHashAsToken,
+
   referenceVaultValidator,
   referenceVaultScript,
   referenceVaultHash,
@@ -149,7 +153,8 @@ mkReferenceVault beaconSym _ ctx@ScriptContext{scriptContextTxInfo = info} =
     beaconsBurned :: ScriptHash -> Bool
     beaconsBurned sh = 
       let refName = scriptHashAsToken sh 
-      in Num.negate (beaconInput refName) == valueOf (txInfoMint info) beaconSym refName
+      in traceIfFalse "Beacons not burned" $
+           Num.negate (beaconInput refName) == valueOf (txInfoMint info) beaconSym refName
 
 data ReferenceVault
 instance ValidatorTypes ReferenceVault where
@@ -231,6 +236,7 @@ mkBeaconPolicy appName refVaultHash r ctx@ScriptContext{scriptContextTxInfo = in
     destinationCheck :: ScriptHash -> Bool
     destinationCheck beaconRefScript =
       let outputs = txInfoOutputs info
+          name = scriptHashAsToken beaconRefScript
           foo acc TxOut{txOutDatum=d
                        ,txOutValue=oVal
                        ,txOutReferenceScript=maybeRef
@@ -239,7 +245,7 @@ mkBeaconPolicy appName refVaultHash r ctx@ScriptContext{scriptContextTxInfo = in
                                             }
                        } =
             let datum = parseDatum d
-            in if valueOf oVal beaconSym adaToken == 1
+            in if valueOf oVal beaconSym name == 1
                then case (addrCred,maybeStakeCred,maybeRef) of
                 (ScriptCredential vh, Just (StakingHash _),Just ss) ->
                   -- | validDestination and validDatum will both fail with traceError unless True.
@@ -249,7 +255,7 @@ mkBeaconPolicy appName refVaultHash r ctx@ScriptContext{scriptContextTxInfo = in
                 (ScriptCredential _, _ , Nothing) ->
                   traceError "Beacon not stored with a reference script"
                 (PubKeyCredential _, _, _) ->
-                  traceError ("Beacon not minted to a " <> appName <> " script address")
+                  traceError ("Beacon not minted to the proper " <> appName <> " address")
                else acc
       in foldl' foo True outputs
 
