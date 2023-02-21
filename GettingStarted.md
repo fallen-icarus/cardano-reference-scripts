@@ -9,6 +9,10 @@ When testing, it is highly recommended that you change the string passed to the 
 ---
 ## Table of Contents
 - [Installing](#installing)
+- [Create a shared reference script](#create-a-shared-reference-script)
+- [Close a shared reference script](#close-a-shared-reference-script)
+- [Staking pubkey hash](#staking-pubkey-hash)
+- [Quering the chain for a usable reference script](#querying-the-chain-for-a-usable-reference-script)
 
 ---
 ## Installing
@@ -45,6 +49,7 @@ You can now exit the nix-shell with `exit`.
 
 All `cardano-reference-scripts` subcommands have an associated `--help` option. The functionality is meant to feel like `cardano-cli`.
 
+---
 ## Create a shared reference script
 ### Calculate the hash of the reference script to be added - needed for token name
 ``` Bash
@@ -128,6 +133,7 @@ cardano-cli transaction submit \
   --tx-file tx.signed
 ```
 
+---
 ## Close a shared reference script
 ### Calculate the hash of the reference script to be removed - needed for token name
 If you know the hash of the reference script, you can set this variable to that hash. It would be the token name of the beacon stored with the reference script you want to remove.
@@ -232,7 +238,7 @@ This is what an example query would look like when piped into jq:
 }
 ```
 
-:important: When using blockfrost, the query command will return an error of `"The requested component has not been found."` when that beacon has never been minted before. This is due to the beacon name being part of the Blockfrost api url like:
+:warning: When using blockfrost, the query command will return an error of `"The requested component has not been found."` when that beacon has never been minted before. This is due to the beacon name being part of the Blockfrost api url like:
 
 ``` Url
 https://cardano-preprod.blockfrost.io/api/v0/assets/{beacon_name}/addresses
